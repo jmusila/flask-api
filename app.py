@@ -97,19 +97,19 @@ def check_if_user_exists(email):
 @app.route('/login', methods = ['POST'])
 def login():
     if request.is_json:
-        email = request.json['email'],
+        email = request.json['email']
         password = request.json['password']
     else:
-        email = request.form['email'],
+        email = request.form['email']
         password = request.form['password']
 
-    user = User.query.filter_by(email = email, password = password).first()
+    user_check = check_if_user_exists(email)
 
-    if user:
-        access_token = create_access_token(identity = email)
-        return jsonify(message = 'User logged in successfully', access_token = access_token), 200
+    if user_check and check_password_hash(user_check.password, password):
+        access_token = create_access_token(identity=email)
+        return jsonify(message='User logged in successfully', access_token=access_token), 200
     else:
-        return jsonify(message = 'Incorrect email or password'), 401
+        return jsonify(message='Incorrect email or password'), 401
     
 # database models
 class User(db.Model):
