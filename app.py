@@ -73,6 +73,25 @@ def get_planets():
     
     return jsonify(data = result), 200
 
+@app.route('/register', methods=['POST'])
+def register():
+    email = request.form['email']
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    password = request.form['password']
+    user = User(first_name = first_name, last_name = last_name, email = email, password = generate_password_hash(password))
+
+    if check_if_user_exists(email):
+        return jsonify(message = 'Email has already been taken.'), 409
+    save_record(user)
+
+    return jsonify(message = 'User created successfully'), 201
+
+def check_if_user_exists(email):
+    user = User.query.filter_by(email = email).first()
+    return user
+        
+
     
 # database models
 class User(db.Model):
