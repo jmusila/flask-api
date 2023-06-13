@@ -2,11 +2,13 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Float
 from werkzeug.security import generate_password_hash
+from flask_marshmallow import Marshmallow
 import os
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'planets.db')
+ma = Marshmallow(app)
 
 db = SQLAlchemy(app)
 
@@ -63,6 +65,14 @@ def save_record(db_statement):
     db.session.add(db_statement)
     db.session.commit()
     print('Data saved successfully')
+
+@app.route('/planets/list', methods=['GET'])
+def get_planets():
+    planets = Planet.query.all()
+    result = planets_schema.dump(planets)
+    
+    return jsonify(data = result), 200
+
     
 # database models
 class User(db.Model):
@@ -82,6 +92,20 @@ class Planet(db.Model):
     mass = Column(Float)
     radius = Column(Float)
     distance = Column(Float)
+
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'first_name', 'last_name', 'email', 'password')
+
+class PlanetSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'planet_name', 'planet_type', 'home_star', 'mass', 'radius', 'distance')
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
+
+planet_schema = PlanetSchema()
+planets_schema = PlanetSchema(many=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
