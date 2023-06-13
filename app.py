@@ -5,15 +5,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_marshmallow import Marshmallow
 import os
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'planets.db')
 app.config['JWT_SECRET_KEY'] = 'super-secret'
+app.config['MAIL_SERVER'] = 'smtp.mailtrap.io'
+app.config['MAIL_USERNAME'] = '70b5a90da8295f'
+app.config['MAIL_PASSWORD'] = '675a31b531289b'
 
 ma = Marshmallow(app)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+mail = Mail(app)
 
 @app.cli.command('db_create')
 def db_create():
@@ -111,6 +116,16 @@ def login():
     else:
         return jsonify(message='Incorrect email or password'), 401
     
+@app.route('/retreive_password/<string:email>', methods = ['GET'])
+def retrieve_password(email: str):
+    user = check_if_user_exists(email)
+    if user:
+        msg = Message("Your Planetary password is " + user.password, sender='planetary.admin.com', recipients=[email])
+        mail.send(msg)
+        return jsonify(message = 'Password send to ' + email)
+    else:
+        return jsonify(message = 'Email does not exist')
+ 
 # database models
 class User(db.Model):
     __tablename__ = 'users'
