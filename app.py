@@ -99,6 +99,10 @@ def check_if_user_exists(email):
     user = User.query.filter_by(email = email).first()
     return user
 
+def check_if_planet_exists(planet_name):
+    planet = Planet.query.filter_by(planet_name = planet_name).first()
+    return planet
+
 @app.route('/login', methods = ['POST'])
 def login():
     if request.is_json:
@@ -125,7 +129,59 @@ def retrieve_password(email: str):
         return jsonify(message = 'Password send to ' + email)
     else:
         return jsonify(message = 'Email does not exist')
+    
+@app.route('/planet/<int:id>', methods =['GET'])
+def get_single_planet(id: int):
+    planet = Planet.query.filter_by(id = id).first()
+    result = planet_schema.dump(planet)
+
+    return jsonify(message = 'Planet retrieved successfully', data = result), 200
  
+@app.route('/planet/create', methods =['POST'])
+@jwt_required()
+def create_single_planet():
+    if request.is_json:
+        planet_name = request.json['planet_name']
+        planet_type = request.json['planet_type']
+        home_star = request.json['home_star']
+        mass = request.json['mass']
+        radius = request.json['radius']
+        distance = request.json['distance']
+    else:
+        planet_name = request.form['planet_name']
+        planet_type = request.form['planet_type']
+        home_star = request.form['home_star']
+        mass = request.form['mass']
+        radius = request.form['radius']
+        distance = request.form['distance']
+    
+    if check_if_planet_exists(planet_name):
+        return jsonify(message = 'Planet name is already taken.'), 409
+    else:
+        new_planet = Planet(planet_name= planet_name, planet_type = planet_type, home_star = home_star, mass = mass, radius = radius, distance = distance)
+        save_record(new_planet)
+        return jsonify(message = 'Planet created successfully'), 201
+    
+@app.route('/planet/update/<int:id>', methods =['PUT'])
+@jwt_required()
+def update_single_planet(id: int):
+    id = int(request.form['id'])
+    planet = Planet.query.filter_by(id = id).first()
+
+    if planet:
+        planet.planet_name = request.form['planet_name']
+        planet.planet_type = request.form['planet_type']
+        planet.home_star = request.form['home_star']
+        planet.mass = float(request.form['mass'])
+        planet.radius = float(request.form['radius'])
+        planet.distance = float(request.form['distance'])
+
+        db.session.commit()
+
+        return jsonify(message = 'Planet updated successfully.')
+    else:
+        return jsonify(message = 'Planet with that id does not exist')
+
 # database models
 class User(db.Model):
     __tablename__ = 'users'
