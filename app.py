@@ -181,6 +181,19 @@ def update_single_planet(id: int):
         return jsonify(message = 'Planet updated successfully.')
     else:
         return jsonify(message = 'Planet with that id does not exist')
+    
+@app.route('/planet/delete/<int:id>', methods =['DELETE'])
+@jwt_required()
+def delete_single_planet(id: int):
+    id = int(request.form['id'])
+    planet = Planet.query.filter_by(id = id).first()
+
+    if planet:
+        db.session.delete(planet)
+        db.session.commit()
+        return jsonify(message = 'Planet deleted successfully.'), 200
+    else:
+        return jsonify(message = 'Planet with that id does not exist')
 
 # database models
 class User(db.Model):
