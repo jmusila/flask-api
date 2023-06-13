@@ -22,8 +22,16 @@ def db_drop():
 @app.cli.command('db_seed')
 def db_seed():
     mercury = Planet(planet_name = 'Mercury', planet_type = 'Class D', home_star = 'Sol', mass = 3.258e23, radius = 1516, distance = 35.98e6)
-    mercury = Planet(planet_name = 'Mercury', planet_type = 'Class D', home_star = 'Sol', mass = 3.258e23, radius = 1516, distance = 35.98e6)
-    mercury = Planet(planet_name = 'Mercury', planet_type = 'Class D', home_star = 'Sol', mass = 3.258e23, radius = 1516, distance = 35.98e6)
+    venus = Planet(planet_name = 'Venus', planet_type = 'Class K', home_star = 'Sol', mass = 4.867e24, radius = 3760, distance = 67.24e6)
+    earth = Planet(planet_name = 'Earth', planet_type = 'Class M', home_star = 'Sol', mass = 5.972e24, radius = 3959, distance = 92.96e6)
+
+    save_record(mercury)
+    save_record(venus)
+    save_record(earth)
+
+    test_user = User(first_name = 'William', last_name = 'Herschel', email = 'test@gmail.com', password = 'P@ssw0rd')
+
+    save_record(test_user)
 
 @app.route('/')
 def hello_world():
@@ -49,6 +57,9 @@ def url_variables(name: str, age: int):
         return jsonify(message= 'Sorry, ' + name + ', you are not old enough'), 401
     else:
         return jsonify(message = 'Welcome ' + name + ', you are old enough'), 200
+
+def save_record(db_statement):
+    return db.session.add(db_statement)
     
 # database models
 class User(db.model):
