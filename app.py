@@ -191,7 +191,7 @@ def delete_single_planet(id: int):
     if planet:
         db.session.delete(planet)
         db.session.commit()
-        return jsonify(message = 'Planet deleted successfully.'), 200
+        return jsonify(message = 'Planet deleted successfully.'), 202
     else:
         return jsonify(message = 'Planet with that id does not exist')
 
