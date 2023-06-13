@@ -59,10 +59,12 @@ def url_variables(name: str, age: int):
         return jsonify(message = 'Welcome ' + name + ', you are old enough'), 200
 
 def save_record(db_statement):
-    return db.session.add(db_statement)
+    db.session.add(db_statement)
+    db.session.commit()
+    print('Data saved successfully')
     
 # database models
-class User(db.model):
+class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     first_name = Column(String)
@@ -70,7 +72,7 @@ class User(db.model):
     email = Column(String, unique=True)
     password = Column(String)
 
-class Planet(db.model):
+class Planet(db.Model):
     __tablename__ = 'planets'
     id = Column(Integer, primary_key=True)
     planet_name = Column(String)
